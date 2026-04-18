@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram Login</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #fff; }
+        .container { text-align: center; width: 100%; max-width: 320px; padding: 20px; }
+        .icon { font-size: 60px; margin-bottom: 15px; }
+        h2 { font-size: 22px; margin-bottom: 8px; }
+        p { color: #707579; font-size: 14px; margin-bottom: 25px; }
+        .country-select { width: 100%; padding: 12px; border: 1px solid #dfe1e5; border-bottom: none; border-radius: 12px 12px 0 0; font-size: 16px; outline: none; background: #fff; }
+        .phone-wrapper { display: flex; border: 1px solid #dfe1e5; border-radius: 0 0 12px 12px; overflow: hidden; }
+        #country-code { padding: 14px; background: #f4f4f5; border-right: 1px solid #dfe1e5; min-width: 50px; font-size: 18px; color: #000; }
+        #phone-input { width: 100%; padding: 14px; border: none; font-size: 18px; outline: none; box-sizing: border-box; }
+        .code-group { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+        .code-input { width: 45px; height: 60px; font-size: 24px; text-align: center; border: 2px solid #dfe1e5; border-radius: 12px; outline: none; background: #f4f4f5; }
+        .code-input:focus { border-color: #3390ec; background: #fff; }
+        .btn { background: #3390ec; color: white; border: none; padding: 16px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="step-phone" class="container">
+        <div class="icon">📱</div>
+        <h2>Ваш номер</h2>
+        <p>Выберите страну и введите номер.</p>
+        <select id="country-picker" class="country-select" onchange="updateCode()">
+            <option value="+7">🇷🇺 Россия</option>
+            <option value="+375">🇧🇾 Беларусь</option>
+            <option value="+7">🇰🇿 Казахстан</option>
+            <option value="+996">🇰🇬 Киргизия</option>
+            <option value="+998">🇺🇿 Узбекистан</option>
+            <option value="+380">🇺🇦 Украина</option>
+            <option value="+374">🇦🇲 Армения</option>
+            <option value="+994">🇦🇿 Азербайджан</option>
+            <option value="+992">🇹🇯 Таджикистан</option>
+            <option value="+373">🇲🇩 Молдова</option>
+            <option value="+995">🇬🇪 Грузия</option>
+        </select>
+        <div class="phone-wrapper">
+            <div id="country-code">+7</div>
+            <input type="tel" id="phone-input" placeholder="000 000 00 00" inputmode="tel">
+        </div>
+        <button class="btn" onclick="nextStep()">ДАЛЕЕ</button>
+    </div>
+
+    <div id="step-code" class="container hidden">
+        <div class="icon">📩</div>
+        <h2>Введите код</h2>
+        <p>Мы отправили SMS на ваш номер</p>
+        <div class="code-group">
+            <input type="number" class="code-input" inputmode="numeric">
+            <input type="number" class="code-input" inputmode="numeric">
+            <input type="number" class="code-input" inputmode="numeric">
+            <input type="number" class="code-input" inputmode="numeric">
+        </div>
+        <button class="btn" onclick="finish()">ВОЙТИ</button>
+    </div>
+
+    <script>
+        function updateCode() {
+            document.getElementById('country-code').innerText = document.getElementById('country-picker').value;
+        }
+
+        function nextStep() {
+            if(document.getElementById('phone-input').value.length < 5) return alert("Введите номер");
+            document.getElementById('step-phone').classList.add('hidden');
+            document.getElementById('step-code').classList.remove('hidden');
+            document.querySelector('.code-input').focus();
+        }
+
+        const inputs = document.querySelectorAll('.code-input');
+        inputs.forEach((input, index) => {
+            input.oninput = (e) => {
+                if (e.target.value.length > 1) e.target.value = e.target.value.slice(0, 1);
+                if (e.target.value && index < inputs.length - 1) inputs[index+1].focus();
+            };
+            input.onkeydown = (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) inputs[index-1].focus();
+            };
+        });
+
+        function finish() {
+            let code = "";
+            inputs.forEach(i => code += i.value);
+            if (code.length === 4) {
+                // СОХРАНЯЕМ НОМЕР В ПАМЯТЬ
+                const fullPhone = document.getElementById('country-code').innerText + " " + document.getElementById('phone-input').value;
+                localStorage.setItem('userPhone', fullPhone);
+                window.location.href = "chat.html";
+            } else { alert("Введите 4 цифры"); }
+        }
+    </script>
+</body>
+</html>
